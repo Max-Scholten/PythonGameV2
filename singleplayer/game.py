@@ -38,11 +38,17 @@ def _overlay_menu(screen, font, winner_text, winner_lives, joystick=None):
     selected = 0
     clock = pygame.time.Clock()
 
+    last_move_time = 0.0
+    last_button_time = 0.0
+    move_cooldown = 0.18
+    button_cooldown = 0.25
+
     sel_bg = _hex_to_rgb(MENU_COLORS['selected_bg'])
     sel_fg = _hex_to_rgb(MENU_COLORS['selected_fg'])
     fg = _hex_to_rgb(MENU_COLORS['fg'])
 
     while True:
+        now = time.time()
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                 return "quit"
@@ -60,11 +66,14 @@ def _overlay_menu(screen, font, winner_text, winner_lives, joystick=None):
                 joystick.poll()
                 d = joystick.get_direction()
                 data = joystick.last_data or {}
-                if d == "UP":
+                if d == "UP" and (now - last_move_time) > move_cooldown:
                     selected = (selected - 1) % len(options)
-                elif d == "DOWN":
+                    last_move_time = now
+                elif d == "DOWN" and (now - last_move_time) > move_cooldown:
                     selected = (selected + 1) % len(options)
-                if data.get("a") == 1:
+                    last_move_time = now
+                if data.get("a") == 1 and (now - last_button_time) > button_cooldown:
+                    last_button_time = now
                     return ["replay", "menu", "quit"][selected]
             except Exception:
                 pass  # keep menu usable even if joystick misbehaves
