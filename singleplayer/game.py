@@ -1,6 +1,7 @@
 import pygame
 import time
 import random
+import ctypes
 from shared.player import Player
 from controller.joystick import ArduinoJoystick
 
@@ -113,12 +114,37 @@ def _cleanup(joystick=None):
 def run(p1_config):
     """Main loop for single-player match (simplified for novices)."""
     pygame.init()
-    screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
+    # create a standard resizable window then ask the OS to maximize it (windowed-maximized)
+    try:
+        screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
+    except Exception:
+        screen = pygame.display.set_mode((800, 600))
+    # On Windows, try to maximize the window while keeping decorations
+    try:
+        wm = pygame.display.get_wm_info()
+        hwnd = wm.get('window') or wm.get('hwnd')
+        if hwnd:
+            try:
+                ctypes.windll.user32.ShowWindow(hwnd, 3)  # SW_MAXIMIZE
+            except Exception:
+                pass
+            try:
+                w, h = pygame.display.get_window_size()
+            except Exception:
+                info = pygame.display.Info()
+                w, h = info.current_w, info.current_h
+            try:
+                screen = pygame.display.set_mode((w, h), pygame.RESIZABLE)
+            except Exception:
+                pass
+    except Exception:
+        pass
+
     pygame.display.set_caption("Street Fighter - Single Player")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 36)
 
-    # load background once (may be None)
+    # load background once (maybe None)
     bg_orig = None
     try:
         if BACKGROUND_IMAGE:
