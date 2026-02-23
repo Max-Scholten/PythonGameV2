@@ -14,8 +14,7 @@ MENU_COLORS = {
 }
 
 # Optional background image path (set to a file path string to enable)
-BACKGROUND_IMAGE = r'assets\backgroundS.jpg'  # use assets/backgroundS.jpg for singleplayer
-
+BACKGROUND_IMAGE = r'assets\\backgroundS.jpg'  # use assets/backgroundS.jpg for singleplayer
 COUNTDOWN_START = 5
 
 
@@ -183,7 +182,7 @@ def run(p1_config):
 
     def make_players():
         # use the player sprite for player 1 so it looks like a real character
-        p1_sprite_path = r'assets\sp1.png'
+        p1_sprite_path = r'assets\\sp1.png'
         # increase size so the image appears larger in-game; adjust y so center lines up with CPU
         # compute horizontal positions so players are always 50px from screen edges
         sw = screen.get_width()
@@ -194,15 +193,15 @@ def run(p1_config):
                     special=p1_config.get("special","fireball"), color=(0,200,80), sprite=p1_sprite_path, size=p_size)
         # give player 2 a sprite and match size/vertical alignment with player1
         p2 = Player(x=p2_x, y=280, character="CPU", special="spread",
-                    color=(200,50,50), bullet_speed=-10, sprite=r'assets\sp2.png', size=p_size)
+                    color=(200,50,50), bullet_speed=-10, sprite=r'assets\\sp2.png', size=p_size)
 
         # assign projectile sprites (found in assets folder):
         # - Player 1 uses LasserP for standard shots and FireBall for the special
         # - Player 2 uses LasserTeal for standard shots and FireBall for the special
-        p1.bullet_sprite = r'assets\LasserP.png'
-        p1.special_sprite = r'assets\FireBall.png'
-        p2.bullet_sprite = r'assets\LasserTeal.png'
-        p2.special_sprite = r'assets\FireBall.png'
+        p1.bullet_sprite = r'assets\\LasserP.png'
+        p1.special_sprite = r'assets\\FireBall.png'
+        p2.bullet_sprite = r'assets\\LasserTeal.png'
+        p2.special_sprite = r'assets\\FireBall.png'
 
         return p1, p2
 
@@ -216,6 +215,70 @@ def run(p1_config):
                 joy1 = None
 
         font = pygame.font.SysFont(None, 36)
+
+        # import plugin manager lazily so Modules can be optional
+        try:
+            from Modules import plugin_manager
+        except Exception:
+            plugin_manager = None
+
+        # helper: keep players on-screen with 50px margins
+        def _clamp_player(p):
+            try:
+                h = screen.get_height()
+            except Exception:
+                h = 600
+            if p.rect.y < 0:
+                p.rect.y = 0
+            if p.rect.y > h - p.rect.height:
+                p.rect.y = h - p.rect.height
+            # horizontal clamp 50px from edges
+            min_x = 50
+            if p.rect.x < min_x:
+                p.rect.x = min_x
+            if p.rect.x > screen.get_width() - p.rect.width - min_x:
+                p.rect.x = screen.get_width() - p.rect.width - min_x
+
+        def _poll_joy(joy):
+            if not joy:
+                return None, None
+            try:
+                joy.poll()
+                return joy.get_direction(), joy.last_data
+            except Exception:
+                return None, None
+
+        def _handle_collisions(a, b):
+            for bullet in a.bullets[:]:
+                if bullet.rect.colliderect(b.rect):
+                    b.hit()
+                    try:
+                        a.bullets.remove(bullet)
+                    except ValueError:
+                        pass
+
+        def _ai_step():
+            nonlocal last_ai_move, ai_move_interval, ai_dir, last_ai_shot, last_ai_special
+            now = time.time()
+            if now - last_ai_move > ai_move_interval:
+                last_ai_move = now
+                ai_move_interval = random.uniform(0.35, 1.2)
+                ai_dir = random.choice([-1, 0, 1])
+            if ai_dir == -1:
+                player2.move_up()
+            elif ai_dir == 1:
+                player2.move_down()
+            if now - last_ai_shot > ai_shoot_cooldown and random.random() < 0.35:
+                player2.shoot()
+                last_ai_shot = now
+            if now - last_ai_special > ai_special_cooldown and random.random() < 0.12:
+                player2.special_attack()
+                last_ai_special = now
+
+        def _draw_hud():
+            screen.blit(font.render(f"Lives P1: {player1.lives}", True, (255,255,255)), (12,12))
+            cpu_x = max(200, screen.get_width() - 180)
+            screen.blit(font.render(f"Lives CPU: {player2.lives}", True, (255,255,255)), (cpu_x, 12))
 
         while True:
                 # start a fresh match
@@ -277,13 +340,7 @@ def run(p1_config):
                             pass
 
                 # joystick poll once per frame
-                if joy1:
-                    joy1.poll()
-                    dir1 = joy1.get_direction()
-                    data1 = joy1.last_data
-                else:
-                    dir1 = None
-                    data1 = None
+                dir1, data1 = _poll_joy(joy1)
 
                 # player controls
                 if dir1 == "UP":
@@ -302,37 +359,12 @@ def run(p1_config):
                 if data1 and data1.get("b") == 1:
                     player1.special_attack()
 
-                # CPU AI
-                if now - last_ai_move > ai_move_interval:
-                    last_ai_move = now
-                    ai_move_interval = random.uniform(0.35, 1.2)
-                    ai_dir = random.choice([-1, 0, 1])
-                if ai_dir == -1:
-                    player2.move_up()
-                elif ai_dir == 1:
-                    player2.move_down()
-                if now - last_ai_shot > ai_shoot_cooldown and random.random() < 0.35:
-                    player2.shoot()
-                    last_ai_shot = now
-                if now - last_ai_special > ai_special_cooldown and random.random() < 0.12:
-                    player2.special_attack()
-                    last_ai_special = now
+                # AI step
+                _ai_step()
 
                 # collisions
-                for b in player1.bullets[:]:
-                    if b.rect.colliderect(player2.rect):
-                        player2.hit()
-                        try:
-                            player1.bullets.remove(b)
-                        except ValueError:
-                            pass
-                for b in player2.bullets[:]:
-                    if b.rect.colliderect(player1.rect):
-                        player1.hit()
-                        try:
-                            player2.bullets.remove(b)
-                        except ValueError:
-                            pass
+                _handle_collisions(player1, player2)
+                _handle_collisions(player2, player1)
 
                 player1.update(screen)
                 player2.update(screen)
@@ -340,15 +372,25 @@ def run(p1_config):
                 player2.update_invulnerability()
 
                 # HUD (positions adapt to current window size)
-                screen.blit(font.render(f"Lives P1: {player1.lives}", True, (255,255,255)), (12,12))
-                # place CPU lives anchored near the right edge
-                cpu_x = max(200, screen.get_width() - 180)
-                screen.blit(font.render(f"Lives CPU: {player2.lives}", True, (255,255,255)), (cpu_x, 12))
+                _draw_hud()
 
                 pygame.display.flip()
                 clock.tick(60)
 
-                if player1.lives <= 0 or player2.lives <= 0:
+                # If player 1 runs out of lives, give plugins a chance to intervene (e.g. ejection mini-game)
+                if player1.lives <= 0:
+                    handled = False
+                    if plugin_manager:
+                        try:
+                            handled = plugin_manager.run_hook('on_all_lives_lost', player1, joy1, screen)
+                        except Exception:
+                            handled = False
+                    if not handled:
+                        game_over = True
+                    else:
+                        # plugin restored a life; ensure positions are legal and continue
+                        _clamp_player(player1)
+                elif player2.lives <= 0:
                     game_over = True
 
             # decide winner and show end menu overlay

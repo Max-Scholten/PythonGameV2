@@ -236,6 +236,12 @@ def run(p1_config, p2_config):
         except Exception:
             pass
 
+        # lazy import plugin manager so Modules remains optional
+        try:
+            from Modules import plugin_manager
+        except Exception:
+            plugin_manager = None
+
         game_over = False
         while not game_over:
             now = time.time()
@@ -343,34 +349,63 @@ def run(p1_config, p2_config):
             pygame.display.flip()
             clock.tick(60)
 
-            if player1.lives <= 0 or player2.lives <= 0:
-                game_over = True
+            # give plugins a chance to handle a player's last life (e.g. ejection minigame)
+            if player1.lives <= 0:
+                handled = False
+                if plugin_manager:
+                    try:
+                        handled = plugin_manager.run_hook('on_all_lives_lost', player1, joy1, screen)
+                    except Exception:
+                        handled = False
+                if not handled:
+                    game_over = True
+                else:
+                    # plugin restored a life; clamp positions and continue
+                    try:
+                        # ensure player1 stays on screen
+                        player1.rect.y = max(0, min(player1.rect.y, screen.get_height() - player1.rect.height))
+                    except Exception:
+                        pass
+            elif player2.lives <= 0:
+                handled = False
+                if plugin_manager:
+                    try:
+                        handled = plugin_manager.run_hook('on_all_lives_lost', player2, joy2, screen)
+                    except Exception:
+                        handled = False
+                if not handled:
+                    game_over = True
+                else:
+                    try:
+                        player2.rect.y = max(0, min(player2.rect.y, screen.get_height() - player2.rect.height))
+                    except Exception:
+                        pass
 
-        # decide winner and show overlay menu
-        if player1.lives > player2.lives:
-            winner_text = "Player 1 won!"
-            winner_lives = player1.lives
-        else:
-            winner_text = "Player 2 won!"
-            winner_lives = player2.lives
+            # decide winner and show overlay menu
+            if player1.lives > player2.lives:
+                winner_text = "Player 1 won!"
+                winner_lives = player1.lives
+            else:
+                winner_text = "Player 2 won!"
+                winner_lives = player2.lives
 
-        choice = _overlay_menu(screen, font, winner_text, winner_lives, joystick=joy1 or joy2)
-        if choice == "replay":
-            # show retro countdown then restart match loop
-            try:
-                for n in range(5, -1, -1):
-                    screen.fill((8,8,16))
-                    txt = pygame.font.SysFont(None, 120).render(str(n), True, (255,255,0))
-                    screen.blit(txt, (screen.get_width()//2 - txt.get_width()//2, screen.get_height()//2 - txt.get_height()//2))
-                    pygame.display.flip()
-                    time.sleep(0.8)
-            except Exception:
-                pass
-            return "replay"
-        elif choice == "menu":
-            return "menu"
-        else:
-            return "quit"
+            choice = _overlay_menu(screen, font, winner_text, winner_lives, joystick=joy1 or joy2)
+            if choice == "replay":
+                # show retro countdown then restart match loop
+                try:
+                    for n in range(5, -1, -1):
+                        screen.fill((8,8,16))
+                        txt = pygame.font.SysFont(None, 120).render(str(n), True, (255,255,0))
+                        screen.blit(txt, (screen.get_width()//2 - txt.get_width()//2, screen.get_height()//2 - txt.get_height()//2))
+                        pygame.display.flip()
+                        time.sleep(0.8)
+                except Exception:
+                    pass
+                return "replay"
+            elif choice == "menu":
+                return "menu"
+            else:
+                return "quit"
     finally:
         if 'joy1' in locals() and joy1:
             try:
