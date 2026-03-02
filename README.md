@@ -2,8 +2,8 @@
 
 #### This year with the spacnsih exchange program we are going to make a game with python and making controllers using Arduino and funduino's.
 
-- [Image of the Arduino] (public/images/arduino_uno3.PNG)
-- [Image of the Funduino] (public/images/Joystick-Shield.PNG)
+![Image of the Arduino](public/images/arduino_uno3.png)
+![Image of the Funduino](public/images/Joystick-Shield.png)
 
 - Demo video of the game: https://youtu.be/mk0BxJUisdA
 
