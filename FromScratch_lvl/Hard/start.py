@@ -47,41 +47,36 @@ if __name__ == "__main__":
             except Exception:
                 menu_joystick = None
 
-        # quick auto-select when exactly one COM is present
-        if len(ports) == 1:
-            selection = {
-                "mode": "one",
-                "p1": {"character": "Ryu", "special": "fireball", "port": ports[0]}
-            }
-        else:
-            # ensure any leftover pygame windows are closed before opening the Tk menu
+        # always show the StartMenu (removed quick auto-start when only one COM port is present)
+        # added this function because when I was early testing the game I didn't got two arduino boards.
+        # Need to be removed for the player testing phase.
+        try:
             try:
-                try:
-                    pygame.event.pump()
-                except Exception:
-                    pass
-                try:
-                    pygame.display.quit()
-                except Exception:
-                    pass
-                try:
-                    pygame.quit()
-                except Exception:
-                    pass
-                time.sleep(0.06)
+                pygame.event.pump()
             except Exception:
                 pass
-            menu = StartMenu(joystick=menu_joystick)
-            selection = menu.show()
-            if selection is None:
-                # clean up joystick and show powering down screen then exit
-                if menu_joystick:
-                    try:
-                        menu_joystick.close()
-                    except Exception:
-                        pass
-                powering_down_screen()
-                raise SystemExit(0)
+            try:
+                pygame.display.quit()
+            except Exception:
+                pass
+            try:
+                pygame.quit()
+            except Exception:
+                pass
+            time.sleep(0.06)
+        except Exception:
+            pass
+        menu = StartMenu(joystick=menu_joystick)
+        selection = menu.show()
+        if selection is None:
+            # clean up joystick and show powering down screen then exit
+            if menu_joystick:
+                try:
+                    menu_joystick.close()
+                except Exception:
+                    pass
+            powering_down_screen()
+            raise SystemExit(0)
 
         # free menu joystick immediately so game can open the same port (always do this)
         if menu_joystick:
