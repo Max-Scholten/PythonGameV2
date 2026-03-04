@@ -4,7 +4,7 @@
 ```
 Youtube link to Demo space shooter base game: https://youtu.be/mk0BxJUisdA
 ```
-
+## ⚠️ Note: When you want to start the game, make sure to select start.py and RUN the file and not debug.
 For this variant of the exercise of the exchange program we do differently. Instead of dividing the game into sections we are going to make the full base game. Of course, you won't be doing it from scratch, but we have divided the game into three difficulties:
 
 - First is easy difficulty, here you get all the assets and most of the code. You only have fix the controls.()  

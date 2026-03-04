@@ -7,6 +7,7 @@ Youtube link to Demo space shooter base game: https://youtu.be/mk0BxJUisdA
 
 For this variant of the exercise of the exchange program we do differently. Instead of dividing the game into sections we are going to make the full base game. Of course, you won't be doing it from scratch, but we have divided the game into three difficulties:
 
+## ⚠️ Note: When you want to start the game, make sure to select start.py and RUN the file and not debug..
 - First is easy difficulty, here you get all the assets and most of the code. You only have fix the controls.()  
 - Second is medium difficulty, you still get all the assets but, not only are the controls scrambled, but now you also have to fix the code for the movement of the player. You can only move left and right, but you have to make it so that you can move in all directions. You also have to fix the code for shooting bullets.
 - Third is hard difficulty, now it gets interesting. You now have to almost the whole code base. You have to fix the controls, the movement, the shooting, and you also have to add a new feature. 
