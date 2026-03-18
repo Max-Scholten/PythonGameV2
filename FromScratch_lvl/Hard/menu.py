@@ -4,12 +4,12 @@ import time
 # Hardcoded static colors for the menu (edit here to change menu colors)
 MENU_COLORS = {
     # background for the whole window
-    'bg': '#05030a',
+    'bg': '#ffffff',
     # normal option foreground
-    'fg': '#00e5ff',
+    'fg': '#ffffff',
     # selected option background and foreground
-    'selected_bg': '#7b61ff',
-    'selected_fg': '#ff4b81',
+    'selected_bg': '#ffffff',
+    'selected_fg': '#ffffff',
     # window size and fonts
     'size': (840, 520),
     'title_font': ('Helvetica', 24),
@@ -18,8 +18,8 @@ MENU_COLORS = {
 
 # Hardcoded static colors for the loading screen (loader only)
 LOADER_COLORS = {
-    'bg': '#05030a',
-    'neon': ['#ff4b81', '#00e5ff', '#7b61ff'],
+    'bg': '#ffffff',
+    'neon': ['#ffffff', '#ffffff', '#ffffff'],
 }
 
 class RetroLoadingScreen:

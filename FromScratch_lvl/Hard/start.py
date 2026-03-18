@@ -7,11 +7,12 @@ import pygame
 import time
 
 def detect_com_ports():
-    return [p.device for p in list_ports.comports()]
+    # Note: in this function you need to be able to change the COM port manual OR automatically detect it. You can use the `list_ports` from `serial.tools` to get a list of available COM ports.
 
 def powering_down_screen(duration=2.5):
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
+    # Somthing is wrong here
+    screen = pygame.display.set_mode((8, 6))
     clock = pygame.time.Clock()
     start = time.time()
     while True:
@@ -105,5 +106,6 @@ if __name__ == "__main__":
         elif result == "replay":
             continue
         else:
-            powering_down_screen()
+            # Someone forgot to return the correct function.
+
             raise SystemExit(0)

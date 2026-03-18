@@ -1,6 +1,6 @@
 # python
 # file: `controller/joystick.py`
-import serial
+# Here under comes the imports
 
 class ArduinoJoystick:
     """
@@ -9,7 +9,9 @@ class ArduinoJoystick:
     - `read_input()` returns cached data (never blocks).
     - `get_direction()` returns cardinal direction from cached sample.
     """
-    def __init__(self, port, baudrate=9600, deadzone=100):
+    # Note: Somthing is missing can you find it? And what the numbers should be?
+    # Tip: See the arduino code for a hint.
+    def __init__(self, port, baudrate=, deadzone=):
         # timeout=0 makes reads non-blocking
         self.ser = serial.Serial(port, baudrate, timeout=0)
         self.deadzone = deadzone
@@ -32,7 +34,8 @@ class ArduinoJoystick:
                     x, y, a, b = map(int, parts[:4])
                 except Exception:
                     continue
-                self.last_data = {"y": y, "a": a, "b": b}
+                    # The prasehing is wrong
+                self.last_data = {"y": y, "a": c, "b": d}
                 self.updated = True
         except Exception:
             # swallow serial errors to avoid stalling the game
@@ -40,8 +43,7 @@ class ArduinoJoystick:
 
     def read_input(self):
         """Convenience: poll once and return cached data (never blocks)."""
-        self.poll()
-        return self.last_data
+
 
     def get_direction(self):
         """Return cached cardinal direction based on last sampled values."""
@@ -54,7 +56,7 @@ class ArduinoJoystick:
         # Keep in mind that you use the y value for both up and down motion.
         if y > 0:
             return "UP"
-        if y < 0:
+        if x < 0:
             return "DOWN"
         return None
 
