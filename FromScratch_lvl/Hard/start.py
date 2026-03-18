@@ -7,11 +7,12 @@ import pygame
 import time
 
 def detect_com_ports():
-    return [p.device for p in list_ports.comports()]
+    # Note: in this function you need to be able to change the COM port manual OR automatically detect it. You can use the `list_ports` from `serial.tools` to get a list of available COM ports.
 
 def powering_down_screen(duration=2.5):
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
+    # Somthing is wrong here
+    screen = pygame.display.set_mode((8, 6))
     clock = pygame.time.Clock()
     start = time.time()
     while True:
@@ -47,41 +48,36 @@ if __name__ == "__main__":
             except Exception:
                 menu_joystick = None
 
-        # quick auto-select when exactly one COM is present
-        if len(ports) == 1:
-            selection = {
-                "mode": "one",
-                "p1": {"character": "Ryu", "special": "fireball", "port": ports[0]}
-            }
-        else:
-            # ensure any leftover pygame windows are closed before opening the Tk menu
+        # always show the StartMenu (removed quick auto-start when only one COM port is present)
+        # added this function because when I was early testing the game I didn't got two arduino boards.
+        # Need to be removed for the player testing phase.
+        try:
             try:
-                try:
-                    pygame.event.pump()
-                except Exception:
-                    pass
-                try:
-                    pygame.display.quit()
-                except Exception:
-                    pass
-                try:
-                    pygame.quit()
-                except Exception:
-                    pass
-                time.sleep(0.06)
+                pygame.event.pump()
             except Exception:
                 pass
-            menu = StartMenu(joystick=menu_joystick)
-            selection = menu.show()
-            if selection is None:
-                # clean up joystick and show powering down screen then exit
-                if menu_joystick:
-                    try:
-                        menu_joystick.close()
-                    except Exception:
-                        pass
-                powering_down_screen()
-                raise SystemExit(0)
+            try:
+                pygame.display.quit()
+            except Exception:
+                pass
+            try:
+                pygame.quit()
+            except Exception:
+                pass
+            time.sleep(0.06)
+        except Exception:
+            pass
+        menu = StartMenu(joystick=menu_joystick)
+        selection = menu.show()
+        if selection is None:
+            # clean up joystick and show powering down screen then exit
+            if menu_joystick:
+                try:
+                    menu_joystick.close()
+                except Exception:
+                    pass
+            powering_down_screen()
+            raise SystemExit(0)
 
         # free menu joystick immediately so game can open the same port (always do this)
         if menu_joystick:
@@ -110,5 +106,6 @@ if __name__ == "__main__":
         elif result == "replay":
             continue
         else:
-            powering_down_screen()
+            # Someone forgot to return the correct function.
+
             raise SystemExit(0)
