@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Editor backups
+*.swp
+*.swo
+
+# VS Code settings (optional; keep if you want workspace settings tracked)
+# .vscode/
+
+# JetBrains IDE
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
