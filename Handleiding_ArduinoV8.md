@@ -123,8 +123,8 @@ Line ending: None or Newline
 
 ### Example output:
 
-- 0,511,0
-- 0-512,1,0
+- 0,511,0,
+- 0-512,1,0,
 
 ### Format:
 
